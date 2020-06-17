@@ -1,25 +1,23 @@
 // @ts-check
-const fetch = require('node-fetch').default;
+
+const axios = require('axios').default;
+axios.defaults.headers.common['Authorization'] = `Bearer ${process.env.TOKEN}`;
 
 async function getWeather(city) {
-    const weather =  await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${process.env.WEATHER_KEY}`).then((res) => res.json());
-    return weather;
+    const weather = await axios.get(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${process.env.WEATHER_KEY}`);
+    return weather.data;
 }
 
-exports.handler = async function(event, context, callback) {
+exports.handler = async function (event, context, callback) {
     const weather = await getWeather('waterloo, ca');
 
     function display(body) {
         return `The weather is ${body.main.temp} in ${body.name}`
     }
 
-    const res = await fetch(`https://slack.com/api/chat.postMessage`, {
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${process.env.TOKEN}`,
-            'Content-Type': 'application/json'
-          }, 
-        body: JSON.stringify({
+    const res = await axios.post(
+        "https://slack.com/api/chat.postMessage",
+        {
             channel: "CEPE43JQ0",
             blocks: [
                 {
@@ -35,12 +33,11 @@ exports.handler = async function(event, context, callback) {
                     }
                 }
             ]
-        })
-    })
+        });
 
     callback(null, {
         statusCode: 200,
-        body: "success"
+        body: 'success'
     });
 }
 
