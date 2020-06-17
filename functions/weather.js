@@ -7,7 +7,7 @@ async function getWeather(city) {
 }
 
 exports.handler = async function(event, context, callback) {
-    const weather = await getWeather('Waterloo,ca');
+    const weather = await getWeather('waterloo, ca');
 
     function display(body) {
         return `The weather is ${body.main.temp} in ${body.name}`

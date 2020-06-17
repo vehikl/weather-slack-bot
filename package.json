@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "netlify dev"
   },
   "repository": {
     "type": "git",
@@ -17,7 +17,6 @@
   },
   "homepage": "https://github.com/vehikl/weather-slack-bot#readme",
   "dependencies": {
-    "axios": "^0.19.2",
     "netlify-cli": "^2.54.0",
     "node-fetch": "^2.6.0"
   }
