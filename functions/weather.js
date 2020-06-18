@@ -9,7 +9,10 @@ async function getWeather(city) {
 }
 
 exports.handler = async function (event, context, callback) {
-    const weather = await getWeather('waterloo, ca');
+    const parsed = new URLSearchParams(event.body);
+
+    const city = parsed.get('text');
+    const weather = await getWeather(city);
 
     function display(body) {
         return `The weather is ${body.main.temp} in ${body.name}`
