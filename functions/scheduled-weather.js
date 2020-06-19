@@ -1,5 +1,4 @@
 // @ts-check
-
 const axios = require('axios').default;
 axios.defaults.headers.common['Authorization'] = `Bearer ${process.env.TOKEN}`;
 
@@ -13,14 +12,15 @@ function getWeatherIcon(body) {
 }
 
 exports.handler = async function (event, context, callback) {
-  const parsed = new URLSearchParams(event.body);
-  const city = parsed.get('text') || '';
+  const city = 'Waterlo, CA';
 
   try {
     const { data } = await axios.get(
       `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${process.env.WEATHER_KEY}`
     );
+
     const iconUrl = getWeatherIcon(data);
+
     await axios.post('https://slack.com/api/chat.postMessage', {
       channel: process.env.CHANNEL,
       blocks: [
@@ -41,7 +41,7 @@ exports.handler = async function (event, context, callback) {
   } catch (err) {
     await axios.post('https://slack.com/api/chat.postMessage', {
       channel: process.env.CHANNEL,
-      text: `Could not find city:  ${city}`
+      text: `Could not find city: ${city}`
     });
   }
 
