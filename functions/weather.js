@@ -23,17 +23,17 @@ function displayText(body) {
     '50n': ':fog:'
   };
 
-  return `${imageToEmoji[body.weather[0].icon]} The weather is ${body.main.temp} and ${body.weather[0].description} in ${body.name}`;
+  return `${imageToEmoji[body.weather[0].icon]}  The weather is ${body.main.temp}°C and ${body.weather[0].description} in ${body.name}.`;
 }
 
 function getWeatherIcon(body) {
-  const [dayIcon] = body.weather;
-  return `http://openweathermap.org/img/wn/${dayIcon.icon}@2x.png`;
+  return `http://openweathermap.org/img/wn/${body.weather[0].icon}@2x.png`;
 }
 
 exports.handler = async function (event, context, callback) {
   const parsed = new URLSearchParams(event.body);
   const city = parsed.get('text') || '';
+  const channel = parsed.get('channel_id') || process.env.CHANNEL;
 
   try {
     const { data } = await axios.get(
@@ -41,26 +41,13 @@ exports.handler = async function (event, context, callback) {
     );
     const iconUrl = getWeatherIcon(data);
     await axios.post('https://slack.com/api/chat.postMessage', {
-      channel: process.env.CHANNEL,
-      blocks: [
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: displayText(data)
-          },
-          accessory: {
-            type: 'image',
-            image_url: iconUrl,
-            alt_text: data.weather[0].description
-          }
-        }
-      ]
+      channel,
+      text: `${displayText(data)} *_You should probably play it safe and stay inside!_* :colin_kent:`
     });
   } catch (err) {
     await axios.post('https://slack.com/api/chat.postMessage', {
-      channel: process.env.CHANNEL,
-      text: `Could not find city:  ${city || '<No city provided>'}`
+      channel,
+      text: `Could not find city: ${city || '<No city provided>'}`
     });
   }
 
