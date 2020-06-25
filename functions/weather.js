@@ -33,13 +33,12 @@ function getWeatherIcon(body) {
 exports.handler = async function (event, context, callback) {
   const parsed = new URLSearchParams(event.body);
   const city = parsed.get('text') || '';
-  const channel = parsed.get('channel_id') || process.env.CHANNEL;
+  const channel = parsed.get('channel_id');
 
   try {
     const { data } = await axios.get(
       `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${process.env.WEATHER_KEY}`
     );
-    const iconUrl = getWeatherIcon(data);
     await axios.post('https://slack.com/api/chat.postMessage', {
       channel,
       text: `${displayText(data)} *_You should probably play it safe and stay inside!_* :colin_kent:`
