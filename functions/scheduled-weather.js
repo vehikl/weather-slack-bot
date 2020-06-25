@@ -3,45 +3,41 @@ const axios = require('axios').default;
 axios.defaults.headers.common['Authorization'] = `Bearer ${process.env.TOKEN}`;
 
 function displayText(body) {
-  return `:sunny: The weather is ${body.main.temp} and ${body.weather.description} in ${body.name}`;
+  const imageToEmoji = {
+    '01d': ':sunny:',
+    '01n': ':moon:',
+    '02d': ':sun_small_cloud:',
+    '02n': ':cloud:',
+    '03d': ':cloud:',
+    '03n': ':cloud:',
+    '04d': ':cloud:',
+    '04n': ':cloud:',
+    '10d': ':rain_cloud:',
+    '10n': ':rain_cloud:',
+    '11d': ':thunder_cloud_and_rain:',
+    '11n': ':thunder_cloud_and_rain:',
+    '13d': ':snowflake:',
+    '13n': ':snowflake:',
+    '50d': ':fog:',
+    '50n': ':fog:'
+  };
+
+  return `${imageToEmoji[body.weather[0].icon]}  The weather is ${body.main.temp}°C and ${body.weather[0].description} in ${body.name}.`;
 }
 
-function getWeatherIcon(body) {
-  const [dayIcon] = body.weather;
-  return `http://openweathermap.org/img/wn/${dayIcon.icon}@2x.png`;
-}
-
-exports.handler = async function (event, context, callback) {
-  const city = 'Waterlo, CA';
+exports.handler = async function (event, context, callback) {  
+  const offices = [6176823, 6058560, 5969785, 5964700];
+  const { data } = await axios.get(`http://api.openweathermap.org/data/2.5/group?id=${offices}&units=metric&appid=${process.env.WEATHER_KEY}`)
 
   try {
-    const { data } = await axios.get(
-      `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${process.env.WEATHER_KEY}`
-    );
-
-    const iconUrl = getWeatherIcon(data);
-
     await axios.post('https://slack.com/api/chat.postMessage', {
       channel: process.env.CHANNEL,
-      blocks: [
-        {
-          type: 'section',
-          text: {
-            type: 'mrkdwn',
-            text: displayText(data)
-          },
-          accessory: {
-            type: 'image',
-            image_url: iconUrl,
-            alt_text: data.weather.description
-          }
-        }
-      ]
+      blocks: [ ...data.list.map((city) => ({ type: 'section', text: { type: 'mrkdwn', text: displayText(city) } })) ]
     });
   } catch (err) {
     await axios.post('https://slack.com/api/chat.postMessage', {
       channel: process.env.CHANNEL,
-      text: `Could not find city: ${city}`
+      text: `:no_entry: Error: office body not well formed`
     });
   }
 
