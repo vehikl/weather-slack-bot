@@ -62,10 +62,10 @@ exports.handler = async function (event, context, callback) {
           }
         },
         { "type": "divider" },
-        ...data.map(({ city, temp, weather, feels_like}) => ({
+        ...data.map(({ city, feels_like, humidity, temp, weather }) => ({
           type: 'section', 
           text: {
-            "text": `*${city}* _High: ${temp.max}°C / Low: ${temp.min}°C_ \n Current weather conditions ${weather[0].description} `,
+            "text": `*${city}* _*High*: ${temp.max}°C / *Low*: ${temp.min}°C / *Humidity*: ${humidity}%_ \n Current weather conditions ${weather[0].description} `,
             "type": "mrkdwn"
           },
           fields: [
