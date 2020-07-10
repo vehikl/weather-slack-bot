@@ -34,13 +34,13 @@ const getCityWeather = async () => {
 
   await Promise.all(
     officeCoords.map(async ({name, latitude, longitude}) => {
-      const EXCLUDE = 'exclude=current,hourly,minutely';
+      const EXCLUDE = 'exclude=hourly,minutely';
     
-      const { data: { daily: [ today ] } } = await axios.get(
+      const { data: { current, daily: [ today ] } } = await axios.get(
         `https://api.openweathermap.org/data/2.5/onecall?lat=${latitude}&lon=${longitude}&${EXCLUDE}&units=metric&appid=${WEATHER_KEY}`
       );
     
-      offices.push({ city: name.toUpperCase(), ...today })
+      offices.push({ city: name.toUpperCase(), current, daily: today })
     })
   );
 
@@ -62,21 +62,21 @@ exports.handler = async function (event, context, callback) {
           }
         },
         { "type": "divider" },
-        ...data.map(({ city, feels_like, humidity, temp, weather }) => ({
+        ...data.map(({ city, current, daily }) => ({
           type: 'section', 
           text: {
-            "text": `*${city}* _*High*: ${temp.max}°C / *Low*: ${temp.min}°C / *Humidity*: ${humidity}%_ \n Current weather conditions ${weather[0].description} `,
+            "text": `*${city}* _*High*: ${daily.temp.max}°C / *Low*: ${daily.temp.min}°C / *Humidity*: ${daily.humidity}%_ \n _*Weather conditions* Current: ${current.weather[0].description} / Daily: ${daily.weather[0].description}_`,
             "type": "mrkdwn"
           },
           fields: [
             { "type": "mrkdwn", "text": "*Morning*" },
             { "type": "mrkdwn", "text": "*Feels Like*" },
-            { "type": "plain_text", "text": `${imageToEmoji[weather[0].icon]} ${temp.morn}°C` },
-            { "type": "plain_text", "text": `${feels_like.morn}°C` },
+            { "type": "plain_text", "text": `${imageToEmoji[daily.weather[0].icon]} ${daily.temp.morn}°C` },
+            { "type": "plain_text", "text": `${daily.feels_like.morn}°C` },
             { "type": "mrkdwn", "text": "*Afternoon*" },
             { "type": "mrkdwn", "text": "*Feels Like*" },
-            { "type": "plain_text", "text": `${imageToEmoji[weather[0].icon]} ${temp.eve}°C` },
-            { "type": "plain_text", "text": `${feels_like.morn}°C` }
+            { "type": "plain_text", "text": `${imageToEmoji[daily.weather[0].icon]} ${daily.temp.eve}°C` },
+            { "type": "plain_text", "text": `${daily.feels_like.morn}°C` }
           ],
           accessory: {
             "type": "image",
