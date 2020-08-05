@@ -76,7 +76,7 @@ exports.handler = async function (event, context, callback) {
             { "type": "mrkdwn", "text": "*Afternoon*" },
             { "type": "mrkdwn", "text": "*Feels Like*" },
             { "type": "plain_text", "text": `${imageToEmoji[daily.weather[0].icon]} ${daily.temp.eve}°C` },
-            { "type": "plain_text", "text": `${daily.feels_like.morn}°C` }
+            { "type": "plain_text", "text": `${daily.feels_like.eve}°C` }
           ],
           accessory: {
             "type": "image",
